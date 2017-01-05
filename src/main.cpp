@@ -156,9 +156,8 @@ void run(GLFWwindow* window) {
 	Playground::Model unit_plane{screenProgram, "models/unit_plane.obj", 2.0f}; // Scale by 2 so it goes from -1 to 1 instead of -0.5 to 0.5
 
 	// Perspective
-	Playground::Camera camera{window};
+	Playground::Camera camera{window, 75.0f, 0.01f, 1000.0f};
 
-	const auto projection = glm::perspective(glm::radians(75.0f), 16.0f/9.0f, 0.01f, 1000.0f);
 	const auto model = glm::mat4{};
 
 	// Get uniform locations
@@ -176,6 +175,7 @@ void run(GLFWwindow* window) {
 	while (!glfwWindowShouldClose(window)) {
 		// Update camera and matrices
 		camera.update();
+		const auto projection = camera.getProjectionMatrix();
 		const auto view = camera.getViewMatrix();
 		const auto mvp = projection * view * model;
 

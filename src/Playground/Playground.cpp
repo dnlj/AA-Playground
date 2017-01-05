@@ -113,7 +113,7 @@ namespace Playground {
 
 		return ret;
 	}
-	void checkGLErrors(bool displayCheckMessage = false) {
+	void checkGLErrors(bool displayCheckMessage) {
 		if (displayCheckMessage) {
 			std::cout << "Checking for OpenGL errors...\n";
 		}

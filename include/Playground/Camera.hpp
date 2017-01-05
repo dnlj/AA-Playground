@@ -10,7 +10,7 @@
 namespace Playground {
 	class Camera {
 		public:
-			Camera(GLFWwindow* window);
+			Camera(GLFWwindow* window, float fov, float nearZ, float farZ);
 
 			glm::vec3 getRight() const;
 			glm::vec3 getUp() const;
@@ -19,6 +19,7 @@ namespace Playground {
 			void update();
 
 			glm::mat4 getViewMatrix() const;
+			glm::mat4 getProjectionMatrix() const;
 			glm::vec3 getPosition() const;
 
 		private:
@@ -30,6 +31,7 @@ namespace Playground {
 			glm::quat orientation;
 			glm::vec3 position;
 			glm::vec2 lastMousePos;
+			glm::mat4 projection;
 			float moveSpeed;
 			float turnScale;
 

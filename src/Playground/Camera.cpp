@@ -5,13 +5,23 @@
 #include <Playground/Camera.hpp>
 
 namespace Playground {
-	Camera::Camera(GLFWwindow* window) :
+	Camera::Camera(GLFWwindow* window, float fov, float nearZ, float farZ) :
 		window{window},
 		orientation{},
 		position{0.0f, 0.0f, 0.0f},
 		lastMousePos{getMousePos()},
 		moveSpeed{0.25f},
 		turnScale{0.004f} {
+		// Get the window height
+		int width;
+		int height;
+		glfwGetWindowSize(window, &width, &height);
+
+		// Calculate the aspect ratio
+		float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+
+		// Create the projection matrix
+		projection = glm::perspective(glm::radians(fov), aspectRatio, nearZ, farZ);
 	}
 
 	glm::vec3 Camera::getRight() const {
@@ -71,6 +81,10 @@ namespace Playground {
 
 	glm::mat4 Camera::getViewMatrix() const {
 		return glm::mat4_cast(orientation) * glm::translate(glm::mat4{}, -position);
+	}
+
+	glm::mat4 Camera::getProjectionMatrix() const {
+		return projection;
 	}
 
 	glm::vec3 Camera::getPosition() const {
