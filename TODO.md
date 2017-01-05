@@ -1,15 +1,14 @@
 # Urgent
 
-
 # General
-* Generalize rendering to support different render modes
 * Add a UI (imgui, nanogui, gwen,  etc)
+* Add support for multiple lights
 
 # Maintenance
-* Add to github
+* Add a README
 
 # Render Modes:
-- [ ] Forward
+- [X] Forward
 - [ ] Forward+
 - [ ] Defered Rendering
 - [ ] Defered Lighting

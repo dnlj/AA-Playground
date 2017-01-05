@@ -8,7 +8,7 @@
 #include <Playground/Model.hpp>
 
 namespace Playground {
-	Model::Model(GLuint program, const std::string& path, const float scale) : vao{0}, vbo{0}, count{0} {
+	Model::Model(const std::string& path, const float scale, glm::vec3 position) : vao{0}, vbo{0}, count{0}, position{position} {
 
 		// Load the obj
 		std::vector<Playground::Vertex> data;
@@ -22,6 +22,20 @@ namespace Playground {
 		glGenBuffers(1, &vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(Playground::Vertex), &data[0], GL_STATIC_DRAW);
+
+		// Unbind
+		glBindVertexArray(0); // VAO should be unbound before buffers
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	};
+
+	Model::~Model() {
+		glDeleteVertexArrays(1, &vao);
+		glDeleteBuffers(1, &vbo);
+	};
+
+	void Model::setupForUseWith(GLuint program) {
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 		// Setup the vertex attributes
 		GLint vertPosition = glGetAttribLocation(program, "vertPosition");
@@ -49,14 +63,10 @@ namespace Playground {
 			glVertexAttribPointer(vertTexCoord, 2, GL_FLOAT, GL_FALSE, sizeof(Playground::Vertex), reinterpret_cast<GLvoid*>(offsetof(Playground::Vertex, texcoord)));
 		}
 
-		// Unbind vao
-		glBindVertexArray(0);
-	};
-
-	Model::~Model() {
-		glDeleteVertexArrays(1, &vao);
-		glDeleteBuffers(1, &vbo);
-	};
+		// Unbind
+		glBindVertexArray(0); // VAO should be unbound before buffers
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
 
 	GLuint Model::getVAO() {
 		return vao;
@@ -65,6 +75,14 @@ namespace Playground {
 	GLuint Model::getCount() {
 		return count;
 	};
+
+	void Model::setPosition(glm::vec3 position) {
+		this->position = position;
+	}
+
+	const glm::vec3& Model::getPosition() const {
+		return position;
+	}
 
 	void Model::load(const std::string& path, const float scale, std::vector<Playground::Vertex>& data) {
 		tinyobj::attrib_t attrib;
@@ -83,78 +101,50 @@ namespace Playground {
 		}
 
 		// Load the obj into data
-		//for (const auto& shape : shapes) {
-		//	for (const auto& index : shape.mesh.indices) {
-		//		Playground::Vertex vertex{};
-		//
-		//		vertex.position = {
-		//			attrib.vertices[3 * index.vertex_index + 0] * scale,
-		//			attrib.vertices[3 * index.vertex_index + 1] * scale,
-		//			attrib.vertices[3 * index.vertex_index + 2] * scale,
-		//		};
-		//
-		//		vertex.normal = {
-		//			attrib.normals[3 * index.normal_index + 0],
-		//			attrib.normals[3 * index.normal_index + 1],
-		//			attrib.normals[3 * index.normal_index + 2],
-		//		};
-		//
-		//		vertex.color = {1.0f, 0.0f, 0.0f};
-		//
-		//		vertex.texcoord = {
-		//			attrib.texcoords[2 * index.texcoord_index + 0],
-		//			attrib.texcoords[2 * index.texcoord_index + 1],
-		//		};
-		//
-		//		data.push_back(vertex);
-		//		++count;
-		//	}
-		//}
-
-		// Loop over shapes
-		for (size_t s = 0; s < shapes.size(); s++) {
-			// Loop over faces(polygon)
-			size_t index_offset = 0;
-			for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
-				int fv = shapes[s].mesh.num_face_vertices[f];
-
-				// Loop over vertices in the face.
-				for (size_t v = 0; v < fv; v++) {
-					// access to vertex
-					tinyobj::index_t index = shapes[s].mesh.indices[index_offset + v];
-					Playground::Vertex vertex{};
-					
+		for (const auto& shape : shapes) {
+			for (const auto& index : shape.mesh.indices) {
+				Playground::Vertex vertex{};
+				
+				// Positions
+				if (index.vertex_index > -1) {
 					vertex.position = {
 						attrib.vertices[3 * index.vertex_index + 0] * scale,
 						attrib.vertices[3 * index.vertex_index + 1] * scale,
 						attrib.vertices[3 * index.vertex_index + 2] * scale,
 					};
-					
+				} else {
+					std::cout << "[WARNING] Missing normal in model \"" << path << "\"\n";
+					vertex.position = {0.0f, 0.0f, 0.0f};
+				}
+				
+				// Normals
+				if (index.normal_index > -1) {
 					vertex.normal = {
 						attrib.normals[3 * index.normal_index + 0],
 						attrib.normals[3 * index.normal_index + 1],
 						attrib.normals[3 * index.normal_index + 2],
 					};
-					
-					vertex.color = {1.0f, 0.0f, 0.0f};
-					
-					if (index.texcoord_index >= 0) {
-						vertex.texcoord = {
-							attrib.texcoords[2 * index.texcoord_index + 0],
-							attrib.texcoords[2 * index.texcoord_index + 1],
-						};
-					} else {
-						// If no texcoords are given just fill it with zero
-						vertex.texcoord = {0.0f, 0.0f};
-					}
-					
-					data.push_back(vertex);
-					++count;
+				} else {
+					std::cout << "[WARNING] Missing normal in model \"" << path << "\"\n";
+					vertex.normal = {0.0f, 0.0f, 0.0f};
 				}
-				index_offset += fv;
-
-				// per-face material
-				shapes[s].mesh.material_ids[f];
+				
+				// Color
+				vertex.color = {1.0f, 0.0f, 0.0f};
+				
+				// Texture coordinates
+				if (index.texcoord_index > -1) {
+					vertex.texcoord = {
+						attrib.texcoords[2 * index.texcoord_index + 0],
+						attrib.texcoords[2 * index.texcoord_index + 1],
+					};
+				} else {
+					std::cout << "[WARNING] Missing texture coordinate in model \"" << path << "\"\n";
+					vertex.texcoord = {0.0f, 0.0f};
+				}
+				
+				data.push_back(vertex);
+				++count;
 			}
 		}
 	}

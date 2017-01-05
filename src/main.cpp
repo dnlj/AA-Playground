@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <exception>
 #include <vector>
+#include <memory>
 
 // glLoadGen
 #include <glloadgen/gl_core_4_5.h>
@@ -26,6 +27,8 @@
 #include <Playground/Vertex.hpp>
 #include <Playground/Model.hpp>
 #include <Playground/Camera.hpp>
+#include <Playground/Renderer.hpp>
+#include <Playground/RendererForward.hpp>
 
 std::ostream& operator<<(std::ostream& stream, const glm::vec3& vec) {
 	stream << "vec3(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
@@ -45,172 +48,28 @@ void run(GLFWwindow* window) {
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
 
-	// Create the color texture for the frame buffer
-	GLuint fbColorTexture;
-	glGenTextures(1, &fbColorTexture);
-	glBindTexture(GL_TEXTURE_2D, fbColorTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8, windowWidth, windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	
-	// Create the depth texture for the frame buffer
-	GLuint fbDepthTexture;
-	glGenTextures(1, &fbDepthTexture);
-	glBindTexture(GL_TEXTURE_2D, fbDepthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, windowWidth, windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	
-	// Create frame buffer
-	GLuint frameBuffer;
-	glCreateFramebuffers(1, &frameBuffer);
-	
-	// Bind textures to frameBuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbColorTexture, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fbDepthTexture, 0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// Load our models
+	std::vector<std::shared_ptr<Playground::Model>> models {
+		std::make_shared<Playground::Model>("models/unit_cube.obj", 1.0f, glm::vec3{0.0f, 4.0f, 0.0f}),
+		std::make_shared<Playground::Model>("models/unit_axes.obj", 1.0f, glm::vec3{0.0f, 0.0f, 0.0f}),
+	};
 
-	// Setup passthrough shaders
-	GLuint screenProgram = glCreateProgram();
-	{
-		GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
-		GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+	// Renderer
+	std::shared_ptr<Playground::Renderer> renderer = std::make_shared<Playground::RendererForward>(windowWidth, windowHeight, models);
 
-		const std::string vertShaderSource = Playground::loadFile("shaders/passthrough_vert.glsl");
-		const std::string fragShaderSource = Playground::loadFile("shaders/passthrough_frag.glsl");
-
-		const GLchar* vertShaderSourcePtr = vertShaderSource.c_str();
-		const GLchar* fragShaderSourcePtr = fragShaderSource.c_str();
-
-		glShaderSource(vertShader, 1, &vertShaderSourcePtr, nullptr);
-		glShaderSource(fragShader, 1, &fragShaderSourcePtr, nullptr);
-
-		glCompileShader(vertShader);
-		glCompileShader(fragShader);
-
-		Playground::checkShaderSuccess(vertShader);
-		Playground::checkShaderSuccess(fragShader);
-
-		// Setup passthrough program
-		glAttachShader(screenProgram, vertShader);
-		glAttachShader(screenProgram, fragShader);
-
-		glLinkProgram(screenProgram);
-
-		// Detach and delete shaders
-		glDetachShader(screenProgram, vertShader);
-		glDetachShader(screenProgram, fragShader);
-
-		glDeleteShader(vertShader);
-		glDeleteShader(fragShader);
-
-		glBindFragDataLocation(screenProgram, 0, "finalColor");
-	}
-
-	// Setup standard shaders
-	GLuint modelProgram = glCreateProgram();
-	{
-		GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
-		GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-		const std::string vertShaderSource = Playground::loadFile("shaders/vert.glsl");
-		const std::string fragShaderSource = Playground::loadFile("shaders/frag.glsl");
-
-		const GLchar* vertShaderSourcePtr = vertShaderSource.c_str();
-		const GLchar* fragShaderSourcePtr = fragShaderSource.c_str();
-
-		glShaderSource(vertShader, 1, &vertShaderSourcePtr, nullptr);
-		glShaderSource(fragShader, 1, &fragShaderSourcePtr, nullptr);
-
-		glCompileShader(vertShader);
-		glCompileShader(fragShader);
-
-		Playground::checkShaderSuccess(vertShader);
-		Playground::checkShaderSuccess(fragShader);
-
-		// Setup program
-		glAttachShader(modelProgram, vertShader);
-		glAttachShader(modelProgram, fragShader);
-
-		glLinkProgram(modelProgram);
-	
-		// Detach and delete shaders
-		glDetachShader(modelProgram, vertShader);
-		glDetachShader(modelProgram, fragShader);
-
-		glDeleteShader(vertShader);
-		glDeleteShader(fragShader);
-
-		glBindFragDataLocation(modelProgram, 0, "finalColor");
-	}
-	
-	//Playground::Model unit_cube{program, "models/unit_cube.obj", 1.0f};
-	Playground::Model unit_axes{modelProgram, "models/unit_axes.obj", 1.0f};
-	Playground::Model unit_plane{screenProgram, "models/unit_plane.obj", 2.0f}; // Scale by 2 so it goes from -1 to 1 instead of -0.5 to 0.5
-
-	// Perspective
+	// Setup our camera
 	Playground::Camera camera{window, 75.0f, 0.01f, 1000.0f};
-
-	const auto model = glm::mat4{};
-
-	// Get uniform locations
-	const auto mvpLocation = glGetUniformLocation(modelProgram, "mvp");
-	const auto modelMatrixLocation = glGetUniformLocation(modelProgram, "modelMatrix");
-	const auto viewPositionLocation = glGetUniformLocation(modelProgram, "viewPosition");
-	const auto lightPositionLocation = glGetUniformLocation(modelProgram, "lightPosition");
-
-	const auto colorAttachmentLocation = glGetUniformLocation(screenProgram, "colorAttachment");
-
-	// Constants
-	const glm::vec3 lightPosition = {0.0, 0.0, 10.0};
 
 	// Render loop
 	while (!glfwWindowShouldClose(window)) {
 		// Update camera and matrices
 		camera.update();
-		const auto projection = camera.getProjectionMatrix();
-		const auto view = camera.getViewMatrix();
-		const auto mvp = projection * view * model;
 
-		// Draw into the frame buffer
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// Draw the scene
+		renderer->draw(camera);
 
-		// Use the model program
-		glUseProgram(modelProgram);
-
-		// Update uniforms
-		glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, &mvp[0][0]);
-		glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &model[0][0]);
-		glUniform3fv(viewPositionLocation, 1, &camera.getPosition()[0]);
-		glUniform3fv(lightPositionLocation, 1, &lightPosition[0]);
-
-		// Draw the model
-		glBindVertexArray(unit_axes.getVAO());
-		glDrawArrays(GL_TRIANGLES, 0, unit_axes.getCount());
-
-		// Draw onto the screen
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		// Use screen program
-		glUseProgram(screenProgram);
-		
-		// Bind fbColorTexture to texture 0
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, fbColorTexture);
-		glUniform1i(colorAttachmentLocation, 0);
-		
-		// Draw the frame buffer
-		glBindVertexArray(unit_plane.getVAO());
-		glDrawArrays(GL_TRIANGLES, 0, unit_plane.getCount());
+		// Copy over our frame buffer
+		glBlitNamedFramebuffer(renderer->getFrameBuffer(), 0, 0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
 		// Other
 		glfwSwapBuffers(window);
@@ -222,13 +81,6 @@ void run(GLFWwindow* window) {
 			glfwSetWindowShouldClose(window, true);
 		}
 	}
-
-	// Delete OpenGL objects
-	glDeleteTextures(1, &fbColorTexture);
-	glDeleteTextures(1, &fbDepthTexture);
-	glDeleteFramebuffers(1, &frameBuffer);
-	glDeleteProgram(modelProgram);
-	glDeleteProgram(screenProgram);
 }
 
 	
