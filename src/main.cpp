@@ -32,78 +32,12 @@ std::ostream& operator<<(std::ostream& stream, const glm::vec3& vec) {
 	return stream;
 }
 
-void checkGLErrors(bool displayCheckMessage = false) {
-	if (displayCheckMessage) {
-		std::cout << "Checking for OpenGL errors...\n";
-	}
-
-	for (int err = glGetError(); err != GL_NO_ERROR; err = glGetError()) {
-		switch (err) {
-			case GL_NO_ERROR:
-				// This will never be called, see for loop definition
-				std::cout << "GL_NO_ERROR\n";
-				break;
-			case GL_INVALID_ENUM:
-				std::cout << "GL_INVALID_ENUM\n";
-				break;
-			case GL_INVALID_VALUE:
-				std::cout << "GL_INVALID_VALUE\n";
-				break;
-			case GL_INVALID_OPERATION:
-				std::cout << "GL_INVALID_OPERATION\n";
-				break;
-			case GL_INVALID_FRAMEBUFFER_OPERATION:
-				std::cout << "GL_INVALID_FRAMEBUFFER_OPERATION\n";
-				break;
-			case GL_OUT_OF_MEMORY:
-				std::cout << "GL_OUT_OF_MEMORY\n";
-				break;
-			case GL_STACK_UNDERFLOW:
-				std::cout << "GL_STACK_UNDERFLOW\n";
-				break;
-			case GL_STACK_OVERFLOW:
-				std::cout << "GL_STACK_OVERFLOW\n";
-				break;
-			default:
-				std::cout << "Unknown return value from glGetError()" << std::endl;
-				break;
-		}
-	}
-}
-
-void checkShaderSuccess(GLuint shader) {
-	GLint success = 0;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-	
-	if (success) { return; }
-
-	GLint maxLength = 0;
-	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
-
-	std::string errorMessage(maxLength, '\0');
-	glGetShaderInfoLog(shader, static_cast<GLsizei>(errorMessage.size()), nullptr, &errorMessage[0]);
-
-	std::cout << "[SHADER ERROR] " << errorMessage << "\n";
-}
-
-void printInfo() {
-	auto vendor = glGetString(GL_VENDOR);
-	auto version = glGetString(GL_VERSION);
-	auto render = glGetString(GL_RENDERER);
-	auto glsl_version = glGetString(GL_SHADING_LANGUAGE_VERSION);
-
-	std::cout << "Vendor: " << vendor << "\n";
-	std::cout << "GPU: " << render << "\n";
-	std::cout << "OpenGL version: " << version << "\n";
-	std::cout << "GLSL version: " << glsl_version << "\n";
-}
-
 void run(GLFWwindow* window) {
 	int windowWidth;
 	int windowHeight;
 	glfwGetWindowSize(window, &windowWidth, &windowHeight);
 
-	printInfo();
+	Playground::printInfo();
 
 	// General GL stuff
 	glEnable(GL_DEPTH_TEST);
@@ -161,8 +95,8 @@ void run(GLFWwindow* window) {
 		glCompileShader(vertShader);
 		glCompileShader(fragShader);
 
-		checkShaderSuccess(vertShader);
-		checkShaderSuccess(fragShader);
+		Playground::checkShaderSuccess(vertShader);
+		Playground::checkShaderSuccess(fragShader);
 
 		// Setup passthrough program
 		glAttachShader(screenProgram, vertShader);
@@ -198,8 +132,8 @@ void run(GLFWwindow* window) {
 		glCompileShader(vertShader);
 		glCompileShader(fragShader);
 
-		checkShaderSuccess(vertShader);
-		checkShaderSuccess(fragShader);
+		Playground::checkShaderSuccess(vertShader);
+		Playground::checkShaderSuccess(fragShader);
 
 		// Setup program
 		glAttachShader(modelProgram, vertShader);
@@ -281,7 +215,7 @@ void run(GLFWwindow* window) {
 		// Other
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-		checkGLErrors();
+		Playground::checkGLErrors();
 
 		// Check if we should close the window
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE)) {
