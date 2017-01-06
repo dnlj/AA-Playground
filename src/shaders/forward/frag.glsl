@@ -11,19 +11,29 @@ out vec4 finalColor; // The final fragment color
 
 const vec3 specularColor = vec3(1.0, 1.0, 1.0);
 const float specularPower = 20.0;
+const float epsilon = 0.000001;
 
 void main() {
+	// Calculate vectors
 	vec3 lightDir = normalize(lightPosition - fragPosition);
 	vec3 viewDir = normalize(viewPosition - fragPosition);
 	vec3 halfDir = normalize(lightDir + viewDir);
 
+	// Calculate dot products
 	float dotNL = max(0.0, dot(fragNormal, lightDir));
 	float dotNH = max(0.0, dot(fragNormal, halfDir));
 	
-	vec3 ambientLight = fragColor * 0.05;
+	// Calculate lighting factors
+	vec3 ambientLight = fragColor * 0.05; // 0.05 was choses arbitrarily
 	vec3 diffuseLight = fragColor * dotNL;
 	vec3 specularLight = specularColor * pow(dotNH, specularPower);
 
-	vec3 totalLighting = ambientLight + diffuseLight + specularLight;
+	// Calculate attenuation
+	float attenuation = 1.0 / (epsilon + pow(distance(lightPosition, fragPosition), 2.0)); // We add epsilon here to prevent division by zero
+
+	// Calculate final lighting
+	vec3 totalLighting = attenuation * (ambientLight + diffuseLight + specularLight);
+
+	//
 	finalColor = vec4(totalLighting, 1.0);
 }

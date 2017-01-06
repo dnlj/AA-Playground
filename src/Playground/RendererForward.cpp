@@ -43,8 +43,8 @@ namespace Playground {
 			GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
 			GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-			const std::string vertShaderSource = loadFile("shaders/vert.glsl");
-			const std::string fragShaderSource = loadFile("shaders/frag.glsl");
+			const std::string vertShaderSource = loadFile("shaders/forward/vert.glsl");
+			const std::string fragShaderSource = loadFile("shaders/forward/frag.glsl");
 
 			const GLchar* vertShaderSourcePtr = vertShaderSource.c_str();
 			const GLchar* fragShaderSourcePtr = fragShaderSource.c_str();
