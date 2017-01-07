@@ -7,8 +7,8 @@
 #include <Playground/Playground.hpp>
 
 namespace Playground {
-	RendererForward::RendererForward(int width, int height, const std::vector<std::shared_ptr<Playground::Model>>& models, const std::vector<PointLight>& lights) :
-		models{models},
+	RendererForward::RendererForward(int width, int height, const std::vector<Renderable>& objects, const std::vector<PointLight>& lights) :
+		objects{objects},
 		lights{lights} {
 
 		// Create the color texture for the frame buffer
@@ -78,8 +78,8 @@ namespace Playground {
 		}
 
 		// Setup the models
-		for (auto& model : models) {
-			model->setupForUseWith(modelProgram);
+		for (auto& obj : objects) {
+			obj.model->setupForUseWith(modelProgram);
 		}
 
 		// Get uniform locations
@@ -130,9 +130,9 @@ namespace Playground {
 
 
 		// Draw the models
-		for (const auto& model : models) {
+		for (const auto& obj : objects) {
 			// Update matrices
-			glm::mat4 modelMatrix = glm::translate({}, model->getPosition());
+			glm::mat4 modelMatrix = glm::translate({}, obj.position);
 			const auto mvp = projection * view * modelMatrix;
 
 			// Update the uniforms
@@ -140,8 +140,8 @@ namespace Playground {
 			glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, &mvp[0][0]);
 
 			// Draw the model
-			glBindVertexArray(model->getVAO());
-			glDrawArrays(GL_TRIANGLES, 0, model->getCount());
+			glBindVertexArray(obj.model->getVAO());
+			glDrawArrays(GL_TRIANGLES, 0, obj.model->getCount());
 		}
 
 		// Unbind our frame buffer

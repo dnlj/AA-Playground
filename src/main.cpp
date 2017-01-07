@@ -30,6 +30,7 @@
 #include <Playground/Renderer.hpp>
 #include <Playground/RendererForward.hpp>
 #include <Playground/PointLight.hpp>
+#include <Playground/Renderable.hpp>
 
 std::ostream& operator<<(std::ostream& stream, const glm::vec3& vec) {
 	stream << "vec3(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
@@ -50,9 +51,13 @@ void run(GLFWwindow* window) {
 	glFrontFace(GL_CCW);
 
 	// Load our models
-	std::vector<std::shared_ptr<Playground::Model>> models {
-		std::make_shared<Playground::Model>("models/unit_cube.obj", 1.0f, glm::vec3{0.0f, 4.0f, 0.0f}),
-		std::make_shared<Playground::Model>("models/unit_axes.obj", 1.0f, glm::vec3{0.0f, 0.0f, 0.0f}),
+	auto modelUnitCube = std::make_shared<Playground::Model>("models/unit_cube.obj", 1.0f);
+	auto modelUnitAxes = std::make_shared<Playground::Model>("models/unit_axes.obj", 1.0f);
+
+	// Setup our objects
+	std::vector<Playground::Renderable> objects {
+		{modelUnitCube, glm::vec3{0.0f, 4.0f, 0.0f}},
+		{modelUnitAxes, glm::vec3{0.0f, 0.0f, 0.0f}},
 	};
 
 	// Setup our light data
@@ -64,7 +69,7 @@ void run(GLFWwindow* window) {
 	};
 
 	// Renderer
-	auto renderer = std::make_shared<Playground::RendererForward>(windowWidth, windowHeight, models, lights);
+	auto renderer = std::make_shared<Playground::RendererForward>(windowWidth, windowHeight, objects, lights);
 
 	// Setup our camera
 	Playground::Camera camera{window, 75.0f, 0.01f, 1000.0f};

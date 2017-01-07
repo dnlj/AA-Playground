@@ -42,12 +42,6 @@ vec3 calculatePointLight(PointLight light) {
 }
 
 void main() {
-	//PointLight light;
-	//light.position = lightPosition;
-	//light.color = vec3(1.0, 1.0, 1.0);
-	//light.specularColor = light.color;
-	//light.intensity = 1.0;
-
 	vec3 totalLighting = vec3(0.0);
 
 	for (uint i = 0; i < LIGHT_COUNT; ++i) {

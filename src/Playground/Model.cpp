@@ -8,7 +8,7 @@
 #include <Playground/Model.hpp>
 
 namespace Playground {
-	Model::Model(const std::string& path, const float scale, glm::vec3 position) : vao{0}, vbo{0}, count{0}, position{position} {
+	Model::Model(const std::string& path, const float scale) : vao{0}, vbo{0}, count{0} {
 
 		// Load the obj
 		std::vector<Playground::Vertex> data;
@@ -75,14 +75,6 @@ namespace Playground {
 	GLuint Model::getCount() {
 		return count;
 	};
-
-	void Model::setPosition(glm::vec3 position) {
-		this->position = position;
-	}
-
-	const glm::vec3& Model::getPosition() const {
-		return position;
-	}
 
 	void Model::load(const std::string& path, const float scale, std::vector<Playground::Vertex>& data) {
 		tinyobj::attrib_t attrib;
