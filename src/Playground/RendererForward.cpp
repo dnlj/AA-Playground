@@ -127,8 +127,7 @@ namespace Playground {
 		glUniform3fv(glGetUniformLocation(modelProgram, "lights[3].position"),		1, &lights[3].position[0]);
 		glUniform3fv(glGetUniformLocation(modelProgram, "lights[3].color"),			1, &lights[3].color[0]);
 		glUniform1fv(glGetUniformLocation(modelProgram, "lights[3].intensity"),		1, &lights[3].intensity);
-
-
+\
 		// Draw the models
 		for (const auto& obj : objects) {
 			// Update matrices

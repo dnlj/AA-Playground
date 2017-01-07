@@ -50,16 +50,6 @@ void run(GLFWwindow* window) {
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
 
-	// Load our models
-	auto modelUnitCube = std::make_shared<Playground::Model>("models/unit_cube.obj", 1.0f);
-	auto modelUnitAxes = std::make_shared<Playground::Model>("models/unit_axes.obj", 1.0f);
-
-	// Setup our objects
-	std::vector<Playground::Renderable> objects {
-		{modelUnitCube, glm::vec3{0.0f, 4.0f, 0.0f}},
-		{modelUnitAxes, glm::vec3{0.0f, 0.0f, 0.0f}},
-	};
-
 	// Setup our light data
 	std::vector<Playground::PointLight> lights {
 		{{+2.0f, +0.0f, +2.0f}, {1.0f, 1.0f, 1.0f}, 1.0f},
@@ -67,6 +57,21 @@ void run(GLFWwindow* window) {
 		{{-2.0f, +0.0f, -2.0f}, {0.0f, 0.0f, 1.0f}, 1.0f},
 		{{+2.0f, +0.0f, -2.0f}, {0.0f, 1.0f, 1.0f}, 1.0f},
 	};
+
+	// Load our models
+	auto modelUnitCube = std::make_shared<Playground::Model>("models/unit_cube.obj", 1.0f);
+	auto modelUnitAxes = std::make_shared<Playground::Model>("models/unit_axes.obj", 1.0f);
+	auto modelLightBall = std::make_shared<Playground::Model>("models/light_ball.obj", 0.1f);
+
+	// Setup our objects
+	std::vector<Playground::Renderable> objects {
+		{modelUnitCube, glm::vec3{0.0f, 4.0f, 0.0f}},
+		{modelUnitAxes, glm::vec3{0.0f, 0.0f, 0.0f}},
+	};
+
+	for (const auto& light : lights) {
+		objects.push_back({modelLightBall, light.position});
+	}
 
 	// Renderer
 	auto renderer = std::make_shared<Playground::RendererForward>(windowWidth, windowHeight, objects, lights);
