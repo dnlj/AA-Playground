@@ -7,7 +7,10 @@
 #include <Playground/Playground.hpp>
 
 namespace Playground {
-	RendererForward::RendererForward(int width, int height, const std::vector<std::shared_ptr<Playground::Model>>& models) : models{models} {
+	RendererForward::RendererForward(int width, int height, const std::vector<std::shared_ptr<Playground::Model>>& models, const std::vector<PointLight>& lights) :
+		models{models},
+		lights{lights} {
+
 		// Create the color texture for the frame buffer
 		glGenTextures(1, &fboColorTexture);
 		glBindTexture(GL_TEXTURE_2D, fboColorTexture);
@@ -83,7 +86,7 @@ namespace Playground {
 		mvpLocation = glGetUniformLocation(modelProgram, "mvp");
 		modelMatrixLocation = glGetUniformLocation(modelProgram, "modelMatrix");
 		viewPositionLocation = glGetUniformLocation(modelProgram, "viewPosition");
-		lightPositionLocation = glGetUniformLocation(modelProgram, "lightPosition");
+		lightsLocation = glGetUniformLocation(modelProgram, "lights");
 	};
 
 	RendererForward::~RendererForward() {
@@ -107,8 +110,26 @@ namespace Playground {
 
 		// Update uniforms
 		glUniform3fv(viewPositionLocation, 1, &camera.getPosition()[0]);
-		glUniform3fv(lightPositionLocation, 1, &camera.getPosition()[0]);
 
+		// Update lights
+		glUniform3fv(glGetUniformLocation(modelProgram, "lights[0].position"),		1, &lights[0].position[0]);
+		glUniform3fv(glGetUniformLocation(modelProgram, "lights[0].color"),			1, &lights[0].color[0]);
+		glUniform1fv(glGetUniformLocation(modelProgram, "lights[0].intensity"),		1, &lights[0].intensity);
+
+		glUniform3fv(glGetUniformLocation(modelProgram, "lights[1].position"),		1, &lights[1].position[0]);
+		glUniform3fv(glGetUniformLocation(modelProgram, "lights[1].color"),			1, &lights[1].color[0]);
+		glUniform1fv(glGetUniformLocation(modelProgram, "lights[1].intensity"),		1, &lights[1].intensity);
+
+		glUniform3fv(glGetUniformLocation(modelProgram, "lights[2].position"),		1, &lights[2].position[0]);
+		glUniform3fv(glGetUniformLocation(modelProgram, "lights[2].color"),			1, &lights[2].color[0]);
+		glUniform1fv(glGetUniformLocation(modelProgram, "lights[2].intensity"),		1, &lights[2].intensity);
+
+		glUniform3fv(glGetUniformLocation(modelProgram, "lights[3].position"),		1, &lights[3].position[0]);
+		glUniform3fv(glGetUniformLocation(modelProgram, "lights[3].color"),			1, &lights[3].color[0]);
+		glUniform1fv(glGetUniformLocation(modelProgram, "lights[3].intensity"),		1, &lights[3].intensity);
+
+
+		// Draw the models
 		for (const auto& model : models) {
 			// Update matrices
 			glm::mat4 modelMatrix = glm::translate({}, model->getPosition());

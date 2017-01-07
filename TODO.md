@@ -2,7 +2,7 @@
 
 # General
 * Add a UI (imgui, nanogui, gwen,  etc)
-* Add support for multiple lights
+* Setup uniform buffers for the lights
 
 # Maintenance
 * Add a README

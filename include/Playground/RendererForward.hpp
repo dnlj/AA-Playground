@@ -9,11 +9,12 @@
 // Playground
 #include <Playground/Renderer.hpp>
 #include <Playground/Model.hpp>
+#include <Playground/PointLight.hpp>
 
 namespace Playground {
 	class RendererForward : public Renderer {
 		public:
-			RendererForward(int width, int height, const std::vector<std::shared_ptr<Model>>& models);
+			RendererForward(int width, int height, const std::vector<std::shared_ptr<Model>>& models, const std::vector<PointLight>& lights);
 			virtual ~RendererForward();
 
 			virtual void draw(const Camera& camera) override;
@@ -27,8 +28,9 @@ namespace Playground {
 			GLint mvpLocation;
 			GLint modelMatrixLocation;
 			GLint viewPositionLocation;
-			GLint lightPositionLocation;
+			GLint lightsLocation;
 
 			const std::vector<std::shared_ptr<Model>>& models;
+			const std::vector<PointLight>& lights;
 	};
 }

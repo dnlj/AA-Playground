@@ -29,6 +29,7 @@
 #include <Playground/Camera.hpp>
 #include <Playground/Renderer.hpp>
 #include <Playground/RendererForward.hpp>
+#include <Playground/PointLight.hpp>
 
 std::ostream& operator<<(std::ostream& stream, const glm::vec3& vec) {
 	stream << "vec3(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
@@ -54,8 +55,16 @@ void run(GLFWwindow* window) {
 		std::make_shared<Playground::Model>("models/unit_axes.obj", 1.0f, glm::vec3{0.0f, 0.0f, 0.0f}),
 	};
 
+	// Setup our light data
+	std::vector<Playground::PointLight> lights {
+		{{+2.0f, +0.0f, +2.0f}, {1.0f, 1.0f, 1.0f}, 1.0f},
+		{{-2.0f, +0.0f, +2.0f}, {0.0f, 1.0f, 0.0f}, 1.0f},
+		{{-2.0f, +0.0f, -2.0f}, {0.0f, 0.0f, 1.0f}, 1.0f},
+		{{+2.0f, +0.0f, -2.0f}, {0.0f, 1.0f, 1.0f}, 1.0f},
+	};
+
 	// Renderer
-	std::shared_ptr<Playground::Renderer> renderer = std::make_shared<Playground::RendererForward>(windowWidth, windowHeight, models);
+	auto renderer = std::make_shared<Playground::RendererForward>(windowWidth, windowHeight, models, lights);
 
 	// Setup our camera
 	Playground::Camera camera{window, 75.0f, 0.01f, 1000.0f};
