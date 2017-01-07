@@ -13,7 +13,7 @@
 namespace Playground {
 	class Model {
 		public:
-			Model(const std::string& path, const float scale = 1.0f);
+			Model(const std::string& path, const float scale = 1.0f, glm::vec3 color = {1.0f, 1.0f, 1.0f});
 			virtual ~Model();
 
 			void setupForUseWith(GLuint program);
@@ -26,6 +26,6 @@ namespace Playground {
 			GLuint vbo;
 			GLuint count;
 
-			void load(const std::string& path, const float scale, std::vector<Vertex>& data);
+			void load(const std::string& path, const float scale, glm::vec3 color, std::vector<Vertex>& data);
 	};
 }

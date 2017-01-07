@@ -61,7 +61,7 @@ void run(GLFWwindow* window) {
 	// Load our models
 	auto modelUnitCube = std::make_shared<Playground::Model>("models/unit_cube.obj", 1.0f);
 	auto modelUnitAxes = std::make_shared<Playground::Model>("models/unit_axes.obj", 1.0f);
-	auto modelLightBall = std::make_shared<Playground::Model>("models/light_ball.obj", 0.1f);
+	auto modelLightBall = std::make_shared<Playground::Model>("models/light_ball.obj", 0.1f, glm::vec3{0.0f});
 
 	// Setup our objects
 	std::vector<Playground::Renderable> objects {
@@ -69,6 +69,7 @@ void run(GLFWwindow* window) {
 		{modelUnitAxes, glm::vec3{0.0f, 0.0f, 0.0f}},
 	};
 
+	// Add objects to visualize our lights
 	for (const auto& light : lights) {
 		objects.push_back({modelLightBall, light.position});
 	}

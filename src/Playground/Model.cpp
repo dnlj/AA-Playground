@@ -8,11 +8,11 @@
 #include <Playground/Model.hpp>
 
 namespace Playground {
-	Model::Model(const std::string& path, const float scale) : vao{0}, vbo{0}, count{0} {
+	Model::Model(const std::string& path, const float scale, glm::vec3 color) : vao{0}, vbo{0}, count{0} {
 
 		// Load the obj
 		std::vector<Playground::Vertex> data;
-		load(path, scale, data);
+		load(path, scale, color, data);
 
 		// Create vao
 		glGenVertexArrays(1, &vao);
@@ -76,7 +76,7 @@ namespace Playground {
 		return count;
 	};
 
-	void Model::load(const std::string& path, const float scale, std::vector<Playground::Vertex>& data) {
+	void Model::load(const std::string& path, const float scale, glm::vec3 color, std::vector<Playground::Vertex>& data) {
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;
@@ -122,7 +122,7 @@ namespace Playground {
 				}
 				
 				// Color
-				vertex.color = {1.0f, 0.0f, 0.0f};
+				vertex.color = color;
 				
 				// Texture coordinates
 				if (index.texcoord_index > -1) {
