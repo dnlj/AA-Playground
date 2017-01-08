@@ -2,7 +2,7 @@
 
 # General
 * Add a UI (imgui, nanogui, gwen,  etc)
-* Setup uniform buffers for the lights
+* Look into the align layout qualifier
 
 # Maintenance
 * Add a README

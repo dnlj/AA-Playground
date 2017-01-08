@@ -32,11 +32,6 @@
 #include <Playground/PointLight.hpp>
 #include <Playground/Renderable.hpp>
 
-std::ostream& operator<<(std::ostream& stream, const glm::vec3& vec) {
-	stream << "vec3(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
-	return stream;
-}
-
 void run(GLFWwindow* window) {
 	int windowWidth;
 	int windowHeight;
@@ -51,17 +46,18 @@ void run(GLFWwindow* window) {
 	glFrontFace(GL_CCW);
 
 	// Setup our light data
-	std::vector<Playground::PointLight> lights {
-		{{+2.0f, +0.0f, +2.0f}, {1.0f, 1.0f, 1.0f}, 1.0f},
-		{{-2.0f, +0.0f, +2.0f}, {0.0f, 1.0f, 0.0f}, 1.0f},
-		{{-2.0f, +0.0f, -2.0f}, {0.0f, 0.0f, 1.0f}, 1.0f},
-		{{+2.0f, +0.0f, -2.0f}, {0.0f, 1.0f, 1.0f}, 1.0f},
-	};
+	std::vector<Playground::PointLight> lights;
+
+	for (int x = 0; x < 8; ++x) {
+		for (int z = 0; z < 8; ++z) {
+			lights.push_back({{static_cast<float>(x), 0.0f, static_cast<float>(z)}, {1.0f, 1.0f, 1.0f}, 1.0f});
+		}
+	}
 
 	// Load our models
 	auto modelUnitCube = std::make_shared<Playground::Model>("models/unit_cube.obj", 1.0f);
 	auto modelUnitAxes = std::make_shared<Playground::Model>("models/unit_axes.obj", 1.0f);
-	auto modelLightBall = std::make_shared<Playground::Model>("models/light_ball.obj", 0.1f, glm::vec3{0.0f});
+	auto modelLightBall = std::make_shared<Playground::Model>("models/light_ball.obj", 0.03f, glm::vec3{0.0f});
 
 	// Setup our objects
 	std::vector<Playground::Renderable> objects {

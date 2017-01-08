@@ -170,6 +170,23 @@ namespace Playground {
 		std::cout << "[SHADER ERROR] " << errorMessage << "\n";
 	}
 
+	void checkLinkStatus(GLuint program) {
+		GLint success = 0;
+		glGetProgramiv(program, GL_LINK_STATUS, &success);
+
+		if (success) {
+			return;
+		}
+
+		GLint maxLength = 0;
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
+
+		std::string errorMessage(maxLength, '\0');
+		glGetProgramInfoLog(program, static_cast<GLsizei>(errorMessage.size()), nullptr, &errorMessage[0]);
+
+		std::cout << "[LINK ERRROR] " << errorMessage << "\n";
+	}
+
 	void printInfo() {
 		auto vendor = glGetString(GL_VENDOR);
 		auto version = glGetString(GL_VERSION);

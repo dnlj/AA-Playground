@@ -8,13 +8,16 @@ struct PointLight {
 
 const float SPECULAR_POWER = 20.0;
 const float EPSILON = 0.000001;
-const uint LIGHT_COUNT = 4;
+const uint LIGHT_COUNT = 64;
 
 in vec3 fragPosition; // The world space position of this fragment
 in vec3 fragNormal; // The normal of this fragment
 in vec3 fragColor; // The interpolated fragment color
 
-uniform PointLight lights[LIGHT_COUNT];
+layout(std140) uniform Lights {
+	PointLight lights[LIGHT_COUNT]; // A array of all lights in our scene
+};
+
 uniform vec3 viewPosition; // The position of the view/camera
 
 out vec4 finalColor; // The final fragment color

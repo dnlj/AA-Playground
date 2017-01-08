@@ -26,10 +26,10 @@ namespace Playground {
 			GLuint fboColorTexture;
 			GLuint fboDepthTexture;
 			GLuint modelProgram;
+			GLuint ubo;
 			GLint mvpLocation;
 			GLint modelMatrixLocation;
 			GLint viewPositionLocation;
-			GLint lightsLocation;
 
 			const std::vector<Renderable>& objects;
 			const std::vector<PointLight>& lights;

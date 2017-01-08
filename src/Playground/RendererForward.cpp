@@ -1,3 +1,6 @@
+// STD
+#include <iostream>
+
 // GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -66,6 +69,8 @@ namespace Playground {
 			glAttachShader(modelProgram, fragShader);
 
 			glLinkProgram(modelProgram);
+			
+			checkLinkStatus(modelProgram);
 
 			// Detach and delete shaders
 			glDetachShader(modelProgram, vertShader);
@@ -77,16 +82,53 @@ namespace Playground {
 			glBindFragDataLocation(modelProgram, 0, "finalColor");
 		}
 
+		// Get locations
+		mvpLocation = glGetUniformLocation(modelProgram, "mvp");
+		modelMatrixLocation = glGetUniformLocation(modelProgram, "modelMatrix");
+		viewPositionLocation = glGetUniformLocation(modelProgram, "viewPosition");
+		
+		// Setup lights UBO
+		GLsizeiptr pointLightSize = sizeof(PointLight) + sizeof(GLfloat); // We need to add the extra sizeof(Glfloat) here for padding
+		glGenBuffers(1, &ubo);
+		glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+		glBufferData(GL_UNIFORM_BUFFER, pointLightSize * lights.size(), nullptr, GL_STATIC_DRAW);
+
+		// Set UBO data
+		{
+			GLfloat tempData[8];
+			for (int i = 0; i < lights.size(); ++i) {
+				// Position
+				tempData[0] = lights[i].position.x;
+				tempData[1] = lights[i].position.y;
+				tempData[2] = lights[i].position.z;
+				tempData[3] = 0; // Padding
+
+				// Color
+				tempData[4] = lights[i].color.r;
+				tempData[5] = lights[i].color.g;
+				tempData[6] = lights[i].color.b;
+
+				// Intensity
+				tempData[7] = lights[i].intensity;
+
+				// Set the data
+				glBufferSubData(GL_UNIFORM_BUFFER, i * pointLightSize, pointLightSize, tempData);
+			}
+		}
+		
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+		// Bind our UBO to binding point 0
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo);
+
+		// Bind "Lights" (which is at index lightsIndex) from modelProgram to binding point 0
+		GLuint lightsIndex = glGetUniformBlockIndex(modelProgram, "Lights");
+		glUniformBlockBinding(modelProgram, lightsIndex, 0);
+		
 		// Setup the models
 		for (auto& obj : objects) {
 			obj.model->setupForUseWith(modelProgram);
 		}
-
-		// Get uniform locations
-		mvpLocation = glGetUniformLocation(modelProgram, "mvp");
-		modelMatrixLocation = glGetUniformLocation(modelProgram, "modelMatrix");
-		viewPositionLocation = glGetUniformLocation(modelProgram, "viewPosition");
-		lightsLocation = glGetUniformLocation(modelProgram, "lights");
 	};
 
 	RendererForward::~RendererForward() {
@@ -94,6 +136,7 @@ namespace Playground {
 		glDeleteTextures(1, &fboColorTexture);
 		glDeleteTextures(1, &fboDepthTexture);
 		glDeleteProgram(modelProgram);
+		glDeleteBuffers(1, &ubo);
 	};
 
 	void RendererForward::draw(const Camera& camera) {
@@ -111,23 +154,6 @@ namespace Playground {
 		// Update uniforms
 		glUniform3fv(viewPositionLocation, 1, &camera.getPosition()[0]);
 
-		// Update lights
-		glUniform3fv(glGetUniformLocation(modelProgram, "lights[0].position"),		1, &lights[0].position[0]);
-		glUniform3fv(glGetUniformLocation(modelProgram, "lights[0].color"),			1, &lights[0].color[0]);
-		glUniform1fv(glGetUniformLocation(modelProgram, "lights[0].intensity"),		1, &lights[0].intensity);
-
-		glUniform3fv(glGetUniformLocation(modelProgram, "lights[1].position"),		1, &lights[1].position[0]);
-		glUniform3fv(glGetUniformLocation(modelProgram, "lights[1].color"),			1, &lights[1].color[0]);
-		glUniform1fv(glGetUniformLocation(modelProgram, "lights[1].intensity"),		1, &lights[1].intensity);
-
-		glUniform3fv(glGetUniformLocation(modelProgram, "lights[2].position"),		1, &lights[2].position[0]);
-		glUniform3fv(glGetUniformLocation(modelProgram, "lights[2].color"),			1, &lights[2].color[0]);
-		glUniform1fv(glGetUniformLocation(modelProgram, "lights[2].intensity"),		1, &lights[2].intensity);
-
-		glUniform3fv(glGetUniformLocation(modelProgram, "lights[3].position"),		1, &lights[3].position[0]);
-		glUniform3fv(glGetUniformLocation(modelProgram, "lights[3].color"),			1, &lights[3].color[0]);
-		glUniform1fv(glGetUniformLocation(modelProgram, "lights[3].intensity"),		1, &lights[3].intensity);
-\
 		// Draw the models
 		for (const auto& obj : objects) {
 			// Update matrices

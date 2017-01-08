@@ -21,5 +21,6 @@ namespace Playground {
 	std::string loadFile(const std::string &fileName);
 	void checkGLErrors(bool displayCheckMessage = false);
 	void checkShaderSuccess(GLuint shader);
+	void checkLinkStatus(GLuint program);
 	void printInfo();
 }
