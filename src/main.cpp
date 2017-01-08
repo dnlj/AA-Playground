@@ -6,6 +6,7 @@
 #include <exception>
 #include <vector>
 #include <memory>
+#include <random>
 
 // glLoadGen
 #include <glloadgen/gl_core_4_5.h>
@@ -48,21 +49,33 @@ void run(GLFWwindow* window) {
 	// Setup our light data
 	std::vector<Playground::PointLight> lights;
 
-	for (int x = 0; x < 8; ++x) {
-		for (int z = 0; z < 8; ++z) {
-			lights.push_back({{static_cast<float>(x), 0.0f, static_cast<float>(z)}, {1.0f, 1.0f, 1.0f}, 1.0f});
+	for (int x = -4; x < 4; ++x) {
+		for (int z = -4; z < 4; ++z) {
+			const float scale = 10.0f;
+			float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+			float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+			float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+
+			std::cout << r << " " << g << " " << b << "\n";
+			lights.push_back({
+				{static_cast<float>(x * scale), 0.0f, static_cast<float>(z * scale)},
+				{r, g, b},
+				50.0f
+			});
 		}
 	}
 
 	// Load our models
 	auto modelUnitCube = std::make_shared<Playground::Model>("models/unit_cube.obj", 1.0f);
 	auto modelUnitAxes = std::make_shared<Playground::Model>("models/unit_axes.obj", 1.0f);
-	auto modelLightBall = std::make_shared<Playground::Model>("models/light_ball.obj", 0.03f, glm::vec3{0.0f});
+	auto modelUnitPlane = std::make_shared<Playground::Model>("models/unit_plane_flat.obj", 1000.0f);
+	auto modelLightBall = std::make_shared<Playground::Model>("models/light_ball.obj", 0.05f, glm::vec3{0.0f});
 
 	// Setup our objects
 	std::vector<Playground::Renderable> objects {
 		{modelUnitCube, glm::vec3{0.0f, 4.0f, 0.0f}},
 		{modelUnitAxes, glm::vec3{0.0f, 0.0f, 0.0f}},
+		{modelUnitPlane, glm::vec3{0.0f, -0.1f, 0.0f}},
 	};
 
 	// Add objects to visualize our lights

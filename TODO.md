@@ -3,6 +3,7 @@
 # General
 * Add a UI (imgui, nanogui, gwen,  etc)
 * Look into the align layout qualifier
+* Replace rand() with \<random>
 
 # Maintenance
 * Add a README
