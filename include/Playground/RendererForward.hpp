@@ -30,6 +30,9 @@ namespace Playground {
 			GLint mvpLocation;
 			GLint modelMatrixLocation;
 			GLint viewPositionLocation;
+			GLint lightCountLocation;
+
+			GLuint lightCount;
 
 			const std::vector<Renderable>& objects;
 			const std::vector<PointLight>& lights;

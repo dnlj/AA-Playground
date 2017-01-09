@@ -49,18 +49,17 @@ void run(GLFWwindow* window) {
 	// Setup our light data
 	std::vector<Playground::PointLight> lights;
 
-	for (int x = -4; x < 4; ++x) {
-		for (int z = -4; z < 4; ++z) {
+	for (int x = -16; x < 16; ++x) {
+		for (int z = -16; z < 16; ++z) {
 			const float scale = 10.0f;
 			float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 			float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 			float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 
-			std::cout << r << " " << g << " " << b << "\n";
 			lights.push_back({
 				{static_cast<float>(x * scale), 0.0f, static_cast<float>(z * scale)},
 				{r, g, b},
-				50.0f
+				20.0f
 			});
 		}
 	}
@@ -69,7 +68,7 @@ void run(GLFWwindow* window) {
 	auto modelUnitCube = std::make_shared<Playground::Model>("models/unit_cube.obj", 1.0f);
 	auto modelUnitAxes = std::make_shared<Playground::Model>("models/unit_axes.obj", 1.0f);
 	auto modelUnitPlane = std::make_shared<Playground::Model>("models/unit_plane_flat.obj", 1000.0f);
-	auto modelLightBall = std::make_shared<Playground::Model>("models/light_ball.obj", 0.05f, glm::vec3{0.0f});
+	auto modelLightBall = std::make_shared<Playground::Model>("models/light_ball.obj", 0.05f);
 
 	// Setup our objects
 	std::vector<Playground::Renderable> objects {

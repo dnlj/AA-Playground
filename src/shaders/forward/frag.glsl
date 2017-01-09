@@ -7,17 +7,18 @@ struct PointLight {
 };
 
 const float EPSILON = 0.000001;
-const uint LIGHT_COUNT = 64;
+const uint MAX_LIGHTS = 1024;
 
 in vec3 fragPosition; // The world space position of this fragment
 in vec3 fragNormal; // The normal of this fragment
 in vec3 fragColor; // The interpolated fragment color
 
 layout(std140) uniform Lights {
-	PointLight lights[LIGHT_COUNT]; // A array of all lights in our scene
+	PointLight lights[MAX_LIGHTS]; // A array of all lights in our scene
 };
 
 uniform vec3 viewPosition; // The position of the view/camera
+uniform uint lightCount; // The number of lights
 
 out vec4 finalColor; // The final fragment color
 
@@ -42,7 +43,7 @@ vec3 calculatePointLight(PointLight light) {
 void main() {
 	vec3 totalLighting = vec3(0.0);
 
-	for (uint i = 0; i < LIGHT_COUNT; ++i) {
+	for (uint i = 0; i < lightCount; ++i) {
 		totalLighting += calculatePointLight(lights[i]);
 	}
 

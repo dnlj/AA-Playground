@@ -12,7 +12,13 @@
 namespace Playground {
 	RendererForward::RendererForward(int width, int height, const std::vector<Renderable>& objects, const std::vector<PointLight>& lights) :
 		objects{objects},
-		lights{lights} {
+		lights{lights},
+		lightCount{static_cast<GLuint>(lights.size())} {
+
+		if (lightCount > MAX_LIGHTS) {
+			std::cout << "[WARNING] The size of \"lights\" must not exceed Playground::MAX_LIGHTS = " << MAX_LIGHTS << ". Clamping.\n";
+			lightCount = Playground::MAX_LIGHTS;
+		}
 
 		// Create the color texture for the frame buffer
 		glGenTextures(1, &fboColorTexture);
@@ -86,17 +92,18 @@ namespace Playground {
 		mvpLocation = glGetUniformLocation(modelProgram, "mvp");
 		modelMatrixLocation = glGetUniformLocation(modelProgram, "modelMatrix");
 		viewPositionLocation = glGetUniformLocation(modelProgram, "viewPosition");
+		lightCountLocation = glGetUniformLocation(modelProgram, "lightCount");
 		
 		// Setup lights UBO
 		GLsizeiptr pointLightSize = sizeof(PointLight) + sizeof(GLfloat); // We need to add the extra sizeof(Glfloat) here for padding
 		glGenBuffers(1, &ubo);
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-		glBufferData(GL_UNIFORM_BUFFER, pointLightSize * lights.size(), nullptr, GL_STATIC_DRAW);
+		glBufferData(GL_UNIFORM_BUFFER, pointLightSize * lightCount, nullptr, GL_STATIC_DRAW);
 
 		// Set UBO data
 		{
 			GLfloat tempData[8];
-			for (int i = 0; i < lights.size(); ++i) {
+			for (unsigned int i = 0; i < lightCount; ++i) {
 				// Position
 				tempData[0] = lights[i].position.x;
 				tempData[1] = lights[i].position.y;
@@ -153,6 +160,7 @@ namespace Playground {
 
 		// Update uniforms
 		glUniform3fv(viewPositionLocation, 1, &camera.getPosition()[0]);
+		glUniform1uiv(lightCountLocation, 1, &lightCount);
 
 		// Draw the models
 		for (const auto& obj : objects) {

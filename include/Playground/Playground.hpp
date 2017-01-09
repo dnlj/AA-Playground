@@ -9,6 +9,7 @@
 namespace Playground {
 	constexpr int OPENGL_VERSION_MAJOR = 4;
 	constexpr int OPENGL_VERSION_MINOR = 5;
+	constexpr unsigned int MAX_LIGHTS = 1024;
 
 	namespace {
 		bool openGLInitialized = false;
