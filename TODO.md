@@ -4,9 +4,12 @@
 * Add a UI (imgui, nanogui, gwen,  etc)
 * Look into the align layout qualifier
 * Replace rand() with \<random>
+* Add texture support so we can test with transparency
+* Test if it would be more performant to to use a vec3 instead of a vec4 for accum in forward/super_sample_frag.glsl
 
 # Maintenance
 * Add a README
+* Simplify RendererForward constructor
 
 # Render Modes:
 - [X] Forward

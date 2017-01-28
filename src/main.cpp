@@ -32,6 +32,7 @@
 #include <Playground/RendererForward.hpp>
 #include <Playground/PointLight.hpp>
 #include <Playground/Renderable.hpp>
+#include <Playground/AntiAliasingMode.hpp>
 
 void run(GLFWwindow* window) {
 	int windowWidth;
@@ -48,6 +49,8 @@ void run(GLFWwindow* window) {
 
 	// Setup our light data
 	std::vector<Playground::PointLight> lights;
+
+	srand(256); // Seed rand so we always get the same results
 
 	for (int x = -8; x < 8; ++x) {
 		for (int z = -8; z < 8; ++z) {
@@ -84,7 +87,8 @@ void run(GLFWwindow* window) {
 	}
 
 	// Renderer
-	auto renderer = std::make_shared<Playground::RendererForward>(windowWidth, windowHeight, objects, lights);
+	auto renderer = std::make_shared<Playground::RendererForward>(windowWidth, windowHeight, Playground::AntiAliasingMode::NONE, 1, 2, objects, lights);
+
 
 	// Setup our camera
 	Playground::Camera camera{window, 75.0f, 0.01f, 1000.0f};
@@ -98,7 +102,11 @@ void run(GLFWwindow* window) {
 		renderer->draw(camera);
 
 		// Copy over our frame buffer
-		glBlitNamedFramebuffer(renderer->getFrameBuffer(), 0, 0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glViewport(0, 0, windowWidth, windowHeight);
+		glBlitNamedFramebuffer(renderer->getFrameBuffer(), 0,
+			0, 0, windowWidth, windowHeight,
+			0, 0, windowWidth, windowHeight,
+			GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 		// Other
 		glfwSwapBuffers(window);
